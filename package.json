@@ -1,0 +1,29 @@
+{
+    "name": "digital-portfolio-saas-nextjs-v2",
+    "version": "2.0.0",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint"
+    },
+    "dependencies": {
+        "@supabase/auth-helpers-nextjs": "^0.15.0",
+        "@supabase/auth-helpers-react": "^0.15.0",
+        "@supabase/ssr": "^0.8.0",
+        "@supabase/supabase-js": "^2.95.0",
+        "@tailwindcss/postcss": "^4.0.0",
+        "dotenv": "^17.2.3",
+        "framer-motion": "^12.33.0",
+        "lucide-react": "^0.475.0",
+        "next": "^16.1.1",
+        "openai": "^6.18.0",
+        "postcss": "^8.5.1",
+        "react": "19.0.0",
+        "react-dom": "19.0.0",
+        "recharts": "^3.7.0",
+        "tailwindcss": "^4.0.0"
+    }
+}
