@@ -11,6 +11,7 @@ import {
   Eye, EyeOff, ArrowLeft, Home, Activity, BarChart3, Wand2, Upload, Cloud
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
 // --- Components ---
 
