@@ -37,11 +37,19 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.glass-panel {
+.glass-panel,
+.glass-card {
   background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.05);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .glass-input {

@@ -42,10 +42,31 @@ export async function POST(req) {
         return NextResponse.json({ success: true, imageUrl });
 
     } catch (error) {
-        console.error('OpenAI Generation Error:', error);
-        return NextResponse.json(
-            { success: false, message: 'Image generation failed', error: error.message },
-            { status: 500 }
-        );
+        console.error('AI Generation Error:', error);
+
+        // --- FALLBACK STRATEGY: Pollinations.ai ---
+        // If OpenAI fails (billing/limit/key), use Pollinations.ai to ensure the app stays "ALIVE"
+        try {
+            console.log('OpenAI failed. Triggering Pollinations.ai Fallback...');
+            const { prompt } = await (req.clone().json().catch(() => ({})));
+
+            // Pollinations.ai doesn't require a key and is high quality
+            const fallbackUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${Math.floor(Math.random() * 1000000)}&model=flux`;
+
+            // Save fallback to Supabase (if possible)
+            await supabase.from('generations').insert([{ prompt, image_url: fallbackUrl }]);
+
+            return NextResponse.json({
+                success: true,
+                imageUrl: fallbackUrl,
+                note: 'Generated via Fallback Engine'
+            });
+        } catch (fallbackError) {
+            console.error('Final Fallback Error:', fallbackError);
+            return NextResponse.json(
+                { success: false, message: 'Image generation failed completely', error: error.message },
+                { status: 500 }
+            );
+        }
     }
 }
