@@ -16,6 +16,10 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     credits INTEGER DEFAULT 100,
     tier TEXT DEFAULT 'Basic',
     total_generated INTEGER DEFAULT 0,
+    stripe_customer_id TEXT,
+    stripe_subscription_id TEXT,
+    subscription_status TEXT DEFAULT 'inactive',
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
     last_active TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 

@@ -31,7 +31,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body className={`min-h-screen selection:bg-blue-500/30 bg-surface-950 text-white`}>
         <Navbar />
         {children}

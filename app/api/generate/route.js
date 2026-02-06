@@ -10,6 +10,9 @@ export async function POST(req) {
         apiKey: process.env.OPENAI_API_KEY
     });
 
+    // Clone request at the start for retry/fallback safety
+    const reqClone = req.clone();
+
     try {
         const { prompt } = await req.json();
 
@@ -39,22 +42,58 @@ export async function POST(req) {
             console.error('Supabase Save Error:', error);
         }
 
+        // Report usage to Stripe if customer ID exists
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('stripe_customer_id')
+            .single();
+
+        if (profile?.stripe_customer_id) {
+            console.log(`Reporting usage to Stripe for customer: ${profile.stripe_customer_id}`);
+            const stripe = (await import('stripe')).default(process.env.STRIPE_SECRET_KEY);
+            await stripe.billing.meterEvents.create({
+                event_name: 'image_generation',
+                payload: {
+                    value: '1',
+                    stripe_customer_id: profile.stripe_customer_id,
+                },
+            });
+        }
+
         return NextResponse.json({ success: true, imageUrl });
 
     } catch (error) {
         console.error('AI Generation Error:', error);
 
         // --- FALLBACK STRATEGY: Pollinations.ai ---
-        // If OpenAI fails (billing/limit/key), use Pollinations.ai to ensure the app stays "ALIVE"
         try {
             console.log('OpenAI failed. Triggering Pollinations.ai Fallback...');
-            const { prompt } = await (req.clone().json().catch(() => ({})));
+            const { prompt: fallbackPrompt } = await (reqClone.json().catch(() => ({})));
+
+            if (!fallbackPrompt) throw new Error('No prompt found in fallback');
 
             // Pollinations.ai doesn't require a key and is high quality
-            const fallbackUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${Math.floor(Math.random() * 1000000)}&model=flux`;
+            const fallbackUrl = `https://pollinations.ai/p/${encodeURIComponent(fallbackPrompt)}?width=1024&height=1024&seed=${Math.floor(Math.random() * 1000000)}&model=flux`;
 
             // Save fallback to Supabase (if possible)
-            await supabase.from('generations').insert([{ prompt, image_url: fallbackUrl }]);
+            await supabase.from('generations').insert([{ prompt: fallbackPrompt, image_url: fallbackUrl }]);
+
+            // Report usage to Stripe for fallback as well
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('stripe_customer_id')
+                .single();
+
+            if (profile?.stripe_customer_id) {
+                const stripe = (await import('stripe')).default(process.env.STRIPE_SECRET_KEY);
+                await stripe.billing.meterEvents.create({
+                    event_name: 'image_generation',
+                    payload: {
+                        value: '1',
+                        stripe_customer_id: profile.stripe_customer_id,
+                    },
+                });
+            }
 
             return NextResponse.json({
                 success: true,

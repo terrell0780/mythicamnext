@@ -38,6 +38,42 @@ const tiers = [
 ];
 
 export default function Pricing() {
+    const [loading, setLoading] = React.useState(false);
+
+    const handleCheckout = async (tier) => {
+        setLoading(tier.name);
+        try {
+            // Mock price IDs for demonstration - user should replace these
+            const priceIds = {
+                'Starter': 'price_starter_id',
+                'Business': 'price_business_id',
+                'Enterprise': 'price_enterprise_id'
+            };
+
+            const res = await fetch('/api/stripe/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    priceId: priceIds[tier.name],
+                    userId: 'user_uuid_here', // In a real app, get this from Supabase Session
+                    userEmail: 'user@example.com'
+                })
+            });
+
+            const data = await res.json();
+            if (data.success && data.url) {
+                window.location.href = data.url;
+            } else {
+                alert('Checkout failed: ' + (data.message || 'Unknown error'));
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Stripe Error: Could not initiate checkout');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-surface-950 py-24 px-6">
             <div className="max-w-7xl mx-auto">
@@ -80,8 +116,12 @@ export default function Pricing() {
                                 ))}
                             </ul>
 
-                            <button className={`w-full py-4 rounded-2xl font-black transition-all ${tier.highlight ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-xl shadow-blue-500/20' : 'bg-white/5 hover:bg-white/10 text-white border border-white/10'}`}>
-                                {tier.button}
+                            <button
+                                onClick={() => handleCheckout(tier)}
+                                disabled={loading === tier.name}
+                                className={`w-full py-4 rounded-2xl font-black transition-all ${tier.highlight ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-xl shadow-blue-500/20' : 'bg-white/5 hover:bg-white/10 text-white border border-white/10'}`}
+                            >
+                                {loading === tier.name ? 'Processing...' : tier.button}
                             </button>
                         </div>
                     ))}

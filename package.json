@@ -10,6 +10,9 @@
         "lint": "next lint"
     },
     "dependencies": {
+        "@stripe/agent-toolkit": "^0.7.12",
+        "@stripe/ai-sdk": "^0.1.1",
+        "@stripe/token-meter": "^0.1.0",
         "@supabase/auth-helpers-nextjs": "^0.15.0",
         "@supabase/auth-helpers-react": "^0.15.0",
         "@supabase/ssr": "^0.8.0",
