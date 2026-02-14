@@ -227,18 +227,68 @@ export default function EliteAniCoreApp() {
 
   // ---- Studio Action Handler ----
   const handleStudioAction = useCallback(async (image, action) => {
-    // Mock processing delay
-    await new Promise(r => setTimeout(r, 2000));
-
-    const messages = {
-      inpaint: '🎨 In-Paint mode activated. Select regions to edit on the canvas.',
-      upscale: '🔍 Image upscaled to 4K (4096×4096). Quality enhanced.',
-      removebg: '✂️ Background removed. Transparent PNG ready for download.',
-      animate: '🎬 Animation processing started. Your 4-second video will be ready in ~30s.',
-    };
-
-    alert(messages[action] || 'Action completed!');
+    try {
+      const res = await fetch('/api/studio/action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageUrl: image.url, action })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(`${action.toUpperCase()} Successful: ${data.message}`);
+      } else {
+        alert(`Error: ${data.message}`);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Studio action failed');
+    }
   }, []);
+
+  // ---- Governance Handlers ----
+  const handleGeneratePromo = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/eliteani/promo/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: 'Scale EliteAniCore to $100k MRR' })
+      });
+      const data = await res.json();
+      alert(data.message || 'Promo generated in queue');
+      fetchStats();
+    } catch (err) {
+      alert('Promo generation failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeployPromos = async () => {
+    try {
+      const res = await fetch('/api/eliteani/promo/deploy', { method: 'POST' });
+      const data = await res.json();
+      alert(data.message || 'All promos deployed');
+      fetchStats();
+    } catch (err) {
+      alert('Deployment failed');
+    }
+  };
+
+  const toggleKillSwitch = async (enabled) => {
+    try {
+      const res = await fetch('/api/eliteani/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'toggle_kill', enabled })
+      });
+      const data = await res.json();
+      fetchStats();
+      alert(`Kill Switch ${enabled ? 'Engaged' : 'Disengaged'}`);
+    } catch (err) {
+      alert('Failed to toggle kill switch');
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('eliteani_session');
@@ -277,9 +327,10 @@ export default function EliteAniCoreApp() {
           {[
             { id: 'dashboard', label: 'Dashboard', icon: Home },
             { id: 'create', label: 'Create Magic', icon: Wand2 },
-            { id: 'studio', label: 'Studio', icon: Cloud },
-            { id: 'users', label: 'Users', icon: Users },
-            { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+            { id: 'studio', label: 'Studio Editor', icon: Palette },
+            { id: 'governance', label: 'Governance', icon: Activity },
+            { id: 'users', label: 'Users & CRM', icon: Users },
+            { id: 'pricing', label: 'Revenue Loops', icon: DollarSign },
           ].map((item) => (
             <button
               key={item.id}
@@ -575,55 +626,84 @@ export default function EliteAniCoreApp() {
               )}
 
               {/* ========================================== */}
-              {/* STUDIO (Asset Gallery + Editor) */}
+              {/* GOVERNANCE & PROMO ENGINE */}
               {/* ========================================== */}
-              {activeTab === 'studio' && (
+              {activeTab === 'governance' && (
                 <div className="space-y-6">
-                  {/* Upload Area */}
-                  <div className="border-2 border-dashed border-slate-700/50 rounded-3xl p-12 text-center hover:border-purple-500/50 hover:bg-slate-800/30 transition-all cursor-pointer group">
-                    <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-xl shadow-black/20">
-                      <Upload className="text-purple-400" size={32} />
-                    </div>
-                    <h3 className="text-2xl font-bold text-white mb-2">Upload Assets</h3>
-                    <p className="text-slate-400">Drag & Drop files here or click to browse</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <GlassCard>
+                      <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                        <Zap className="text-purple-400" /> AI Promo Engine
+                      </h3>
+                      <p className="text-slate-400 text-sm mb-6">Autonomous orchestration for content distribution and revenue scaling.</p>
+
+                      <div className="space-y-3">
+                        <button
+                          onClick={handleGeneratePromo}
+                          disabled={loading}
+                          className="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl font-bold hover:from-purple-500 hover:to-indigo-500 transition shadow-lg shadow-purple-900/40 flex items-center justify-center gap-2"
+                        >
+                          <Sparkles size={18} /> Generate Master Promo
+                        </button>
+                        <button
+                          onClick={handleDeployPromos}
+                          className="w-full py-4 bg-slate-800 border border-slate-700/50 rounded-xl font-bold hover:bg-slate-700 transition flex items-center justify-center gap-2"
+                        >
+                          <Cloud size={18} /> Deploy To All Channels
+                        </button>
+                      </div>
+                    </GlassCard>
+
+                    <GlassCard>
+                      <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                        <Activity className="text-red-400" /> System Governance
+                      </h3>
+                      <p className="text-slate-400 text-sm mb-6">Master controls for system operation and emergency protocols.</p>
+
+                      <div className="flex items-center justify-between p-4 bg-red-500/5 border border-red-500/20 rounded-xl mb-4">
+                        <div>
+                          <p className="font-bold text-red-400 uppercase tracking-widest text-xs">Emergency Kill-Switch</p>
+                          <p className="text-slate-400 text-xs mt-1">Halt all AI generation & payments globally</p>
+                        </div>
+                        <button
+                          onClick={() => toggleKillSwitch(!dbStats?.killSwitch)}
+                          className={`w-14 h-8 rounded-full relative transition-colors ${dbStats?.killSwitch ? 'bg-red-600' : 'bg-slate-700'}`}
+                        >
+                          <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all ${dbStats?.killSwitch ? 'left-7' : 'left-1'}`} />
+                        </button>
+                      </div>
+
+                      <div className="p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl">
+                        <div className="flex justify-between items-center mb-1">
+                          <p className="font-bold text-blue-400 uppercase tracking-widest text-xs">Promo Throttle</p>
+                          <span className="text-blue-400 font-bold">{dbStats?.promoThrottle || 150}%</span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden mt-2">
+                          <div className="h-full bg-blue-500" style={{ width: `${(dbStats?.promoThrottle || 150) / 1.5}%` }} />
+                        </div>
+                      </div>
+                    </GlassCard>
                   </div>
 
-                  {/* Generated Assets Gallery */}
-                  {generatedImages.length > 0 && (
-                    <>
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-semibold text-white">Your Generated Assets</h3>
-                        <p className="text-sm text-slate-400">{generatedImages.length} assets · Click any to edit</p>
-                      </div>
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {generatedImages.map((img, i) => (
-                          <motion.div
-                            key={i}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="relative aspect-square rounded-xl overflow-hidden bg-slate-800 border border-slate-700/50 cursor-pointer group"
-                            onClick={() => setSelectedImage(img)}
-                          >
-                            <img src={img.url} alt={img.prompt} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                              <button className="p-2.5 rounded-xl bg-white/20 hover:bg-white/30 transition" title="In-Paint">
-                                <Paintbrush size={18} />
-                              </button>
-                              <button className="p-2.5 rounded-xl bg-white/20 hover:bg-white/30 transition" title="Upscale">
-                                <ArrowUpCircle size={18} />
-                              </button>
-                              <button className="p-2.5 rounded-xl bg-white/20 hover:bg-white/30 transition" title="Remove BG">
-                                <Eraser size={18} />
-                              </button>
-                              <button className="p-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 transition" title="Animate">
-                                <Film size={18} />
-                              </button>
+                  {/* System Logs */}
+                  <GlassCard>
+                    <h3 className="text-lg font-bold mb-4">Master Audit Logs</h3>
+                    <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                      {dbStats?.logs?.length > 0 ? (
+                        dbStats.logs.map((log, i) => (
+                          <div key={i} className="flex items-center justify-between p-3 bg-white/5 border border-white/5 rounded-lg text-xs">
+                            <div className="flex items-center gap-3">
+                              <div className="w-2 h-2 rounded-full bg-purple-500" />
+                              <span className="text-slate-300 uppercase font-bold">{log.action}</span>
                             </div>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </>
-                  )}
+                            <span className="text-slate-500">{new Date(log.timestamp).toLocaleString()}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-center py-8 text-slate-500">No recent activity logged</p>
+                      )}
+                    </div>
+                  </GlassCard>
                 </div>
               )}
 
