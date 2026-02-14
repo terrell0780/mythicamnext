@@ -137,13 +137,20 @@ export default function EliteAniCoreApp() {
   const [selectedPreset, setSelectedPreset] = useState('none');
   const [selectedImage, setSelectedImage] = useState(null);
   const [presetsOpen, setPresetsOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const router = useRouter();
 
-  // Fetch Data on Load
+  // Session Check & Data Fetch
   useEffect(() => {
+    const session = localStorage.getItem('eliteani_session');
+    if (!session) {
+      router.push('/login');
+      return;
+    }
+    setUser(JSON.parse(session));
     fetchStats();
     fetchGenerations();
-  }, []);
+  }, [router]);
 
   const fetchStats = async () => {
     try {
@@ -233,8 +240,8 @@ export default function EliteAniCoreApp() {
     alert(messages[action] || 'Action completed!');
   }, []);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
+  const handleLogout = () => {
+    localStorage.removeItem('eliteani_session');
     router.push('/login');
   };
 
@@ -293,11 +300,13 @@ export default function EliteAniCoreApp() {
 
         <div className="p-4 border-t border-slate-700/30">
           <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 border border-white/5">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center font-bold">T</div>
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center font-bold">
+              {user?.name?.charAt(0) || 'U'}
+            </div>
             {sidebarOpen && (
               <div className="flex-1 overflow-hidden">
-                <p className="text-sm font-semibold truncate">Terrell</p>
-                <p className="text-xs text-slate-400 truncate">Admin</p>
+                <p className="text-sm font-semibold truncate">{user?.name || 'User'}</p>
+                <p className="text-xs text-slate-400 truncate">{user?.isAdmin ? 'Admin' : 'Active User'}</p>
               </div>
             )}
           </div>

@@ -8,7 +8,7 @@ import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [pin, setPin] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -20,12 +20,20 @@ export default function LoginPage() {
         setError(null);
 
         try {
-            const { data, error: authError } = await supabase.auth.signInWithPassword({
-                email,
-                password,
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, pin })
             });
 
-            if (authError) throw authError;
+            const data = await res.json();
+
+            if (!data.success) {
+                throw new Error(data.message || 'Login failed');
+            }
+
+            // Save user info to local storage for session management (demo mode)
+            localStorage.setItem('eliteani_session', JSON.stringify(data.user));
 
             router.push('/');
         } catch (err) {
@@ -82,15 +90,15 @@ export default function LoginPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-slate-300 ml-1">Password</label>
+                        <label className="text-sm font-medium text-slate-300 ml-1">Access PIN</label>
                         <div className="relative">
                             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                             <input
                                 type={showPassword ? "text" : "password"}
                                 required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="••••••••"
+                                value={pin}
+                                onChange={(e) => setPin(e.target.value)}
+                                placeholder="••••"
                                 className="w-full pl-12 pr-12 py-3.5 glass-input rounded-xl text-white placeholder-slate-600 transition"
                             />
                             <button
