@@ -1,27 +1,27 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import { supabaseAdmin as supabase } from '@/lib/supabase';
+import { storage } from '@/lib/storage';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// Initialize OpenAI
+// In serverless, this runs on every invocation (or reuses warm instance)
+const openai = process.env.OPENAI_API_KEY
+    ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+    : null;
 
-export async function POST(req) {
-    const openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY
-    });
-
-    // Clone request at the start for retry/fallback safety
-    const reqClone = req.clone();
-
+export async function POST(request) {
     try {
-        const { prompt } = await req.json();
+        const { prompt } = await request.json();
 
         if (!prompt) {
             return NextResponse.json({ success: false, message: 'Prompt is required' }, { status: 400 });
         }
 
-        console.log(`Generating image for prompt: ${prompt}`);
+        if (!openai) {
+            return NextResponse.json({ success: false, message: 'OpenAI not configured. Set OPENAI_API_KEY env var.' }, { status: 503 });
+        }
 
+        // Call OpenAI DALL-E 3
+        console.log(`Generating image for: ${prompt}`);
         const response = await openai.images.generate({
             model: "dall-e-3",
             prompt: prompt,
@@ -31,81 +31,20 @@ export async function POST(req) {
 
         const imageUrl = response.data[0].url;
 
-        // Save to Supabase
-        const { error } = await supabase
-            .from('generations')
-            .insert([
-                { prompt, image_url: imageUrl }
-            ]);
+        // Log to Governance/Activity
+        // In a real app, you'd save this to a DB.
+        // Here we update the in-memory storage (which persists only for the lifetime of the lambda container)
+        // Note: This "Activity Log" feature will be flaky on Vercel Free Tier due to cold starts resetting data.
+        storage.addLog('generated_image', { prompt: prompt.substring(0, 50), imageUrl });
 
-        if (error) {
-            console.error('Supabase Save Error:', error);
-        }
-
-        // Report usage to Stripe if customer ID exists
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('stripe_customer_id')
-            .single();
-
-        if (profile?.stripe_customer_id) {
-            console.log(`Reporting usage to Stripe for customer: ${profile.stripe_customer_id}`);
-            const stripe = (await import('stripe')).default(process.env.STRIPE_SECRET_KEY);
-            await stripe.billing.meterEvents.create({
-                event_name: 'image_generation',
-                payload: {
-                    value: '1',
-                    stripe_customer_id: profile.stripe_customer_id,
-                },
-            });
-        }
+        // We also want to update "Recent Activity" for the dashboard
+        // Currently storage.js doesn't specifically expose a method to update "recentActivity" list beyond logs.
+        // We can add that later if needed.
 
         return NextResponse.json({ success: true, imageUrl });
 
     } catch (error) {
         console.error('AI Generation Error:', error);
-
-        // --- FALLBACK STRATEGY: Pollinations.ai ---
-        try {
-            console.log('OpenAI failed. Triggering Pollinations.ai Fallback...');
-            const { prompt: fallbackPrompt } = await (reqClone.json().catch(() => ({})));
-
-            if (!fallbackPrompt) throw new Error('No prompt found in fallback');
-
-            // Pollinations.ai doesn't require a key and is high quality
-            const fallbackUrl = `https://pollinations.ai/p/${encodeURIComponent(fallbackPrompt)}?width=1024&height=1024&seed=${Math.floor(Math.random() * 1000000)}&model=flux`;
-
-            // Save fallback to Supabase (if possible)
-            await supabase.from('generations').insert([{ prompt: fallbackPrompt, image_url: fallbackUrl }]);
-
-            // Report usage to Stripe for fallback as well
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('stripe_customer_id')
-                .single();
-
-            if (profile?.stripe_customer_id) {
-                const stripe = (await import('stripe')).default(process.env.STRIPE_SECRET_KEY);
-                await stripe.billing.meterEvents.create({
-                    event_name: 'image_generation',
-                    payload: {
-                        value: '1',
-                        stripe_customer_id: profile.stripe_customer_id,
-                    },
-                });
-            }
-
-            return NextResponse.json({
-                success: true,
-                imageUrl: fallbackUrl,
-                note: 'Generated via Fallback Engine'
-            });
-        } catch (fallbackError) {
-            console.error('Final Fallback Error:', fallbackError);
-            return NextResponse.json(
-                { success: false, message: 'Image generation failed completely', error: error.message },
-                { status: 500 }
-            );
-        }
+        return NextResponse.json({ success: false, message: error.message }, { status: 500 });
     }
 }

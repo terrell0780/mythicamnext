@@ -36,7 +36,7 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-height-screen flex items-center justify-center relative overflow-hidden bg-[#0f172a]">
+        <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#0f172a]">
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
                 <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[120px]" />
                 <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-indigo-600/20 rounded-full blur-[120px]" />
@@ -45,7 +45,7 @@ export default function LoginPage() {
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="glass-panel w-full max-width-md p-10 rounded-3xl border border-white/10 z-10 mx-auto"
+                className="glass-panel w-full max-w-md p-10 rounded-3xl border border-white/10 z-10 mx-auto"
                 style={{ maxWidth: '450px' }}
             >
                 <div className="text-center mb-10">

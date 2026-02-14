@@ -1,44 +1,30 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin as supabase } from '@/lib/supabase';
-
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+import { storage } from '@/lib/storage';
 
 export async function GET() {
-    try {
-        console.log('Fetching stats...');
+    const stats = storage.getStats();
 
-        // Safety for build-time execution
-        if (!supabase) {
-            return NextResponse.json({ success: true, stats: { active_users: 0, revenue_today: 0, mrr: 0, total_generations: 0 } });
-        }
+    // Note: chartData was separate in Express. 
+    // We can include it here or make a separate endpoint.
+    // The frontend calls /api/stats and expects { stats: ... } wrapper in Step 24?
+    // Frontend: "if (data.success) setDbStats(data.stats);" -> Expects { success: true, stats: ... }
+    // Express implementation returned directly `db.stats`?
+    // Express: `res.json(db.stats)` -> JSON object.
+    // Frontend `fetchStats`: `const data = await res.json(); if (data.success) ...`
+    // WAIT. If Express returned `db.stats` directly (Step 13 line 372), it does NOT have `{success:true}` wrapper.
+    // Frontend code: `if (data.success) setDbStats(data.stats)`
+    // THIS MEANS THE FRONTEND CODE (Step 24) WAS EXPECTING A WRAPPER that the Express server WAS NOT PROVIDING?
+    // Or maybe I misread the Express code.
+    // Express: `app.get('/api/stats', (req, res) => { res.json(db.stats); });` -> No wrapper.
+    // Frontend: `const data = await res.json(); if (data.success) ...`
+    // This means the frontend might be BROKEN currently with the Express server?
+    // I will fix this in the Next.js implementation by providing the wrapper the Frontend expects.
+    // Or I should match the Frontend's expectation.
 
-        const { count: genCount, error: genError } = await supabase
-            .from('generations')
-            .select('*', { count: 'exact', head: true });
+    // To be safe, I will return { success: true, stats: stats } which matches the frontend code check.
 
-        const { count: userCount, error: userError } = await supabase
-            .from('profiles')
-            .select('*', { count: 'exact', head: true });
-
-        const { data: siteData, error: siteError } = await supabase
-            .from('site_stats')
-            .select('*')
-            .single();
-
-        return NextResponse.json({
-            success: true,
-            stats: {
-                ...(siteData || {}),
-                active_users: userCount || 0,
-                jobs_queued: 0,
-                revenue_today: (siteData?.revenue_today) || 0,
-                mrr: (siteData?.mrr) || 0,
-                total_generations: genCount || 0
-            }
-        });
-    } catch (error) {
-        console.error('Fetch Stats Error:', error);
-        return NextResponse.json({ success: true, stats: { active_users: 0, revenue_today: 0, mrr: 0, total_generations: 0 } });
-    }
+    return NextResponse.json({
+        success: true,
+        stats: stats
+    });
 }

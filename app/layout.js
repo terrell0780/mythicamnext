@@ -3,19 +3,19 @@ import Navbar from "./components/Navbar";
 import PromotionOverlay from "./components/PromotionOverlay";
 
 export const metadata = {
-  title: "Digital Portfolio | SaaS & Venture Growth",
-  description: "Interactive showcase of high-performance SaaS platforms, data architectures, and revenue optimization systems.",
+  title: "EliteAniCore | Autonomous Growth Engine",
+  description: "The autonomous SaaS scaling engine. Orchestrate revenue, growth, and engagement.",
   openGraph: {
-    title: "MythiCorCam | System Intelligence Redefined",
+    title: "EliteAniCore | System Intelligence Redefined",
     description: "Orchestrate your revenue, growth, and engagement with the world's first autonomous SaaS scaling engine.",
-    url: 'https://mythicorcam.intelligence',
-    siteName: 'MythiCorCam',
+    url: 'https://eliteanicore.intelligence',
+    siteName: 'EliteAniCore',
     images: [
       {
         url: '/assets/slide1.png',
         width: 1200,
         height: 630,
-        alt: 'MythiCorCam Intelligence Dashboard',
+        alt: 'EliteAniCore Intelligence Dashboard',
       },
     ],
     locale: 'en_US',
@@ -23,7 +23,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MythiCorCam | System Intelligence Redefined',
+    title: 'EliteAniCore | System Intelligence Redefined',
     description: 'The autonomous growth engine for modern SaaS.',
     images: ['/assets/slide1.png'],
   },

@@ -133,7 +133,7 @@ export default function MythicamApp() {
               animate={{ opacity: 1 }}
               className="text-2xl font-black bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent"
             >
-              MYTHICAM
+              EliteAniCore
             </motion.h1>
           )}
           <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 hover:bg-white/5 rounded-lg transition">
