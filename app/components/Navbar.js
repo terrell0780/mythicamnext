@@ -30,7 +30,7 @@ export default function Navbar() {
                         <div className="p-2 rounded-xl bg-blue-600 group-hover:rotate-12 transition-transform shadow-lg shadow-blue-500/20">
                             <Cpu className="w-5 h-5 text-white" />
                         </div>
-                        <span className="text-xl font-black tracking-tighter gradient-text">MythiCorCam</span>
+                        <span className="text-xl font-black tracking-tighter gradient-text">EliteAniCore</span>
                     </Link>
 
                     {/* Desktop Nav */}

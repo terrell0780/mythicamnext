@@ -50,9 +50,9 @@ export default function LoginPage() {
             >
                 <div className="text-center mb-10">
                     <h1 className="text-4xl font-black bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent mb-2">
-                        MYTHICAM
+                        EliteAniCore
                     </h1>
-                    <p className="text-slate-400">Admin Control Center</p>
+                    <p className="text-slate-400">Autonomous Growth Optimizer</p>
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-6">
