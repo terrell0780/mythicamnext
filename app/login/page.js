@@ -22,7 +22,7 @@ export default function LoginPage() {
             const { error } = await supabase.auth.signInWithOAuth({
                 provider,
                 options: {
-                    redirectTo: `${window.location.origin}/auth/callback`
+                    redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`
                 }
             });
             if (error) throw error;

@@ -21,7 +21,7 @@ class SentinelAI {
 
     async updateHeartbeat() {
         try {
-            await fetch('http://localhost:3000/api/eliteani/sentinel/heartbeat', {
+            await fetch('http://localhost:3001/api/eliteani/sentinel/heartbeat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -96,7 +96,7 @@ class SentinelAI {
         this.log('Scanning Promotional Queue...');
         try {
             // Deploy pending promos
-            const res = await fetch('http://localhost:3000/api/eliteani/promo/deploy', { method: 'POST' });
+            const res = await fetch('http://localhost:3001/api/eliteani/promo/deploy', { method: 'POST' });
             const data = await res.json();
             if (data.success && data.deployed && data.deployed.length > 0) {
                 this.log(`Successfully deployed ${data.deployed.length} promotional campaigns.`);
@@ -107,7 +107,7 @@ class SentinelAI {
             const types = ['Organic Ranking', 'Viral Injection', 'Lead Generation', 'Semantic Indexing', 'Contextual Ad'];
             const statuses = ['Top 3 Indexing', 'Active Engagement', 'Lead Captured', 'Trust Verified', 'Verified'];
 
-            await fetch('http://localhost:3000/api/eliteani/governance', {
+            await fetch('http://localhost:3001/api/eliteani/governance', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

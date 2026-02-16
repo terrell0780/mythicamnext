@@ -165,6 +165,7 @@ const PromotionPulse = ({ pulses }) => {
 // ====================================================================
 export default function EliteAniCoreApp() {
   // State
+  const [hasMounted, setHasMounted] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [prompt, setPrompt] = useState('');
@@ -189,6 +190,7 @@ export default function EliteAniCoreApp() {
 
   // Session Check & Data Fetch
   useEffect(() => {
+    setHasMounted(true);
     const session = localStorage.getItem('eliteani_session');
     if (!session) {
       router.push('/login');
@@ -409,9 +411,9 @@ export default function EliteAniCoreApp() {
       <motion.aside
         initial={false}
         animate={{
-          width: sidebarOpen ? (typeof window !== 'undefined' && window.innerWidth < 1024 ? '85%' : '280px') : '0px',
-          x: sidebarOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth < 1024 ? -280 : 0),
-          opacity: sidebarOpen ? 1 : (typeof window !== 'undefined' && window.innerWidth < 1024 ? 0 : 1)
+          width: !hasMounted ? '280px' : (sidebarOpen ? (typeof window !== 'undefined' && window.innerWidth < 1024 ? '85%' : '280px') : '0px'),
+          x: !hasMounted ? 0 : (sidebarOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth < 1024 ? -280 : 0)),
+          opacity: sidebarOpen ? 1 : (hasMounted && typeof window !== 'undefined' && window.innerWidth < 1024 ? 0 : 1)
         }}
         className={`fixed lg:relative z-50 h-full bg-slate-900 border-r border-slate-800 flex flex-col transition-all duration-300 overflow-hidden ${sidebarOpen ? 'p-6' : 'p-0'}`}
       >
@@ -571,24 +573,28 @@ export default function EliteAniCoreApp() {
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <GlassCard className="lg:col-span-2 min-h-[400px]">
                       <h3 className="text-lg font-semibold mb-6">Revenue Overview</h3>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={revenueData}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                          <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-                          <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
-                          <Tooltip
-                            contentStyle={{ backgroundColor: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
-                            itemStyle={{ color: '#e2e8f0' }}
-                          />
-                          <Bar dataKey="revenue" fill="url(#colorRevenue)" radius={[4, 4, 0, 0]} />
-                          <defs>
-                            <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8} />
-                              <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
-                            </linearGradient>
-                          </defs>
-                        </BarChart>
-                      </ResponsiveContainer>
+                      {hasMounted ? (
+                        <ResponsiveContainer width="100%" height={300}>
+                          <BarChart data={revenueData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                            <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                            <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
+                            <Tooltip
+                              contentStyle={{ backgroundColor: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
+                              itemStyle={{ color: '#e2e8f0' }}
+                            />
+                            <Bar dataKey="revenue" fill="url(#colorRevenue)" radius={[4, 4, 0, 0]} />
+                            <defs>
+                              <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8} />
+                                <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                              </linearGradient>
+                            </defs>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <div className="w-full h-[300px] bg-slate-900/50 rounded-xl animate-pulse" />
+                      )}
                     </GlassCard>
 
                     {/* ROI Breakdown */}
