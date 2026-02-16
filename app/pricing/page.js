@@ -55,9 +55,9 @@ export default function Pricing() {
             // ACTION REQUIRED: Replace these with your real Stripe Price IDs
             // ==========================================================
             const priceIds = {
-                'Starter': 'price_1T1SzKB278CBNQbTCOJwI3TA',
-                'Business': 'price_1T1T0iB278CBNQbTvYq2zRjo',
-                'Elite Source Private': 'price_1T1T48B278CBNQbTt0LnWMzs'
+                'Starter': 'prod_TzRtjOKaa8vQAf',
+                'Business': 'prod_TzRu2BFGpNbKHB',
+                'Elite Source Private': 'prod_TzRyMR2bhablCk'
             };
 
             const res = await fetch('/api/stripe/checkout', {
