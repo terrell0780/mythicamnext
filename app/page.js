@@ -178,6 +178,13 @@ export default function EliteAniCoreApp() {
   const router = useRouter();
 
   const [promoPulses, setPromoPulses] = useState([]);
+  const [governance, setGovernance] = useState({
+    aiSpeed: 50,
+    learningRate: 85,
+    killSwitch: false,
+    promoThrottle: 100,
+    adProof: []
+  });
 
   // Session Check & Data Fetch
   useEffect(() => {
@@ -220,9 +227,28 @@ export default function EliteAniCoreApp() {
     try {
       const res = await fetch('/api/stats');
       const data = await res.json();
-      if (data.success) setDbStats(data.stats);
+      if (data.success) {
+        setDbStats(data.stats);
+        if (data.governance) setGovernance(data.governance);
+      }
     } catch (err) {
       console.error('Stats fetch failed');
+    }
+  };
+
+  const updateGovernance = async (action, value) => {
+    try {
+      const res = await fetch('/api/eliteani/governance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, value })
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchStats(); // Refresh
+      }
+    } catch (err) {
+      console.error('Governance update failed');
     }
   };
 
@@ -713,107 +739,170 @@ export default function EliteAniCoreApp() {
               {activeTab === 'governance' && (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <GlassCard>
-                      <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                        <Zap className="text-purple-400" /> AI Promo Engine
-                      </h3>
-                      <p className="text-slate-400 text-sm mb-6">Autonomous orchestration for content distribution and revenue scaling.</p>
-
-                      <PromotionPulse pulses={promoPulses} />
-
-                      <div className="space-y-3">
-                        <button
-                          onClick={handleGeneratePromo}
-                          disabled={loading}
-                          className="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl font-bold hover:from-purple-500 hover:to-indigo-500 transition shadow-lg shadow-purple-900/40 flex items-center justify-center gap-2"
-                        >
-                          <Sparkles size={18} /> Generate Master Promo
-                        </button>
-                        <button
-                          onClick={handleDeployPromos}
-                          className="w-full py-4 bg-slate-800 border border-slate-700/50 rounded-xl font-bold hover:bg-slate-700 transition flex items-center justify-center gap-2"
-                        >
-                          <Cloud size={18} /> Deploy To All Channels
-                        </button>
-                      </div>
-                    </GlassCard>
-
-                    <GlassCard>
-                      <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                        <Activity className="text-red-400" /> System Governance
-                      </h3>
-                      <p className="text-slate-400 text-sm mb-6">Master controls for system operation and emergency protocols.</p>
-
-                      <div className="flex items-center justify-between p-4 bg-red-500/5 border border-red-500/20 rounded-xl mb-4">
-                        <div>
-                          <p className="font-bold text-red-400 uppercase tracking-widest text-xs">Emergency Kill-Switch</p>
-                          <p className="text-slate-400 text-xs mt-1">Halt all AI generation & payments globally</p>
+                    <div className="grid grid-cols-1 gap-6">
+                      <GlassCard>
+                        <div className="flex items-center justify-between mb-6">
+                          <div>
+                            <h3 className="text-2xl font-black flex items-center gap-3">
+                              <Cpu className="text-indigo-400 w-8 h-8" /> Neural Core <span className="text-xs bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded-full uppercase tracking-tighter">Owner Only</span>
+                            </h3>
+                            <p className="text-slate-400 text-sm mt-1">Direct orchestration of AI deployment velocity and learning optimization.</p>
+                          </div>
+                          <div className={`px-4 py-2 rounded-2xl border transition-all ${governance.killSwitch ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'}`}>
+                            <div className="flex items-center gap-2 font-black text-xs uppercase tracking-widest">
+                              <div className={`w-2 h-2 rounded-full animate-pulse ${governance.killSwitch ? 'bg-red-400' : 'bg-emerald-400'}`} />
+                              {governance.killSwitch ? 'System Halted' : 'Neural Core Active'}
+                            </div>
+                          </div>
                         </div>
-                        <button
-                          onClick={() => toggleKillSwitch(!dbStats?.killSwitch)}
-                          className={`w-14 h-8 rounded-full relative transition-colors ${dbStats?.killSwitch ? 'bg-red-600' : 'bg-slate-700'}`}
-                        >
-                          <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all ${dbStats?.killSwitch ? 'left-7' : 'left-1'}`} />
-                        </button>
-                      </div>
 
-                      <div className="p-4 bg-indigo-500/5 border border-indigo-500/10 rounded-xl mb-4">
-                        <div className="flex items-center gap-3 mb-3">
-                          <Rocket className="text-indigo-400" size={18} />
-                          <p className="font-bold text-indigo-400 uppercase tracking-widest text-xs">Intelligence Lab</p>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                          {/* Speed Slider */}
+                          <div className="p-6 bg-white/5 border border-white/5 rounded-[2rem] space-y-4">
+                            <div className="flex justify-between items-center">
+                              <div className="flex items-center gap-3">
+                                <Zap className="text-yellow-400" size={20} />
+                                <span className="font-bold text-sm uppercase tracking-widest">Deployment Speed</span>
+                              </div>
+                              <span className="text-2xl font-black text-indigo-400">{governance.aiSpeed}%</span>
+                            </div>
+                            <input
+                              type="range"
+                              min="0"
+                              max="100"
+                              value={governance.aiSpeed}
+                              onChange={(e) => updateGovernance('set_speed', parseInt(e.target.value))}
+                              className="w-full h-2 bg-slate-800 rounded-full appearance-none cursor-pointer accent-indigo-500"
+                            />
+                            <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase tracking-tighter">
+                              <span>Conservative</span>
+                              <span>Hyperscale</span>
+                            </div>
+                          </div>
+
+                          {/* Success Slider */}
+                          <div className="p-6 bg-white/5 border border-white/5 rounded-[2rem] space-y-4">
+                            <div className="flex justify-between items-center">
+                              <div className="flex items-center gap-3">
+                                <TrendingUp className="text-emerald-400" size={20} />
+                                <span className="font-bold text-sm uppercase tracking-widest">Learning Optimization</span>
+                              </div>
+                              <span className="text-2xl font-black text-emerald-400">{governance.learningRate}%</span>
+                            </div>
+                            <input
+                              type="range"
+                              min="0"
+                              max="100"
+                              value={governance.learningRate}
+                              onChange={(e) => updateGovernance('set_learning', parseInt(e.target.value))}
+                              className="w-full h-2 bg-slate-800 rounded-full appearance-none cursor-pointer accent-emerald-500"
+                            />
+                            <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase tracking-tighter">
+                              <span>Low Logic</span>
+                              <span>Maximum Success</span>
+                            </div>
+                          </div>
                         </div>
-                        <p className="text-slate-400 text-xs mb-4">Your orchestration logic is performing at 98% efficiency. Deploy a clone to scale new revenue loops.</p>
-                        <div className="flex gap-2">
+
+                        <div className="flex flex-col md:flex-row gap-4">
                           <button
-                            onClick={() => alert("Intelligence Clone Deployed to Sandbox Partition.")}
-                            className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold rounded-lg transition"
+                            onClick={() => updateGovernance('toggle_killswitch', !governance.killSwitch)}
+                            className={`flex-1 py-4 rounded-2xl font-black text-white transition-all transform active:scale-[0.98] shadow-2xl flex items-center justify-center gap-3 ${governance.killSwitch ? 'bg-emerald-600 shadow-emerald-900/40' : 'bg-red-600 shadow-red-900/40'}`}
                           >
-                            Deploy Clone
-                          </button>
-                          <button
-                            onClick={() => alert("Architecture parameters exported to system logs.")}
-                            className="px-3 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg border border-white/10 transition"
-                          >
-                            <Share2 size={12} />
+                            <Power size={20} /> {governance.killSwitch ? 'Re-Engage Neural Core' : 'Global Emergency Killswitch'}
                           </button>
                         </div>
-                      </div>
+                      </GlassCard>
+                    </div>
 
-                      <div className="p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl">
-                        <div className="flex justify-between items-center mb-1">
-                          <p className="font-bold text-blue-400 uppercase tracking-widest text-xs">Promo Throttle</p>
-                          <span className="text-blue-400 font-bold">{dbStats?.promoThrottle || 150}%</span>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <GlassCard>
+                        <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                          <Sparkles className="text-purple-400" /> AI Promo Engine
+                        </h3>
+                        <p className="text-slate-400 text-sm mb-6">Autonomous orchestration for content distribution and revenue scaling.</p>
+                        <PromotionPulse pulses={promoPulses} />
+                        <div className="space-y-3">
+                          <button
+                            onClick={handleGeneratePromo}
+                            disabled={loading}
+                            className="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl font-bold hover:from-purple-500 hover:to-indigo-500 transition shadow-lg shadow-purple-900/40 flex items-center justify-center gap-2"
+                          >
+                            <Sparkles size={18} /> Generate Master Promo
+                          </button>
                         </div>
-                        <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden mt-2">
-                          <div className="h-full bg-blue-500" style={{ width: `${(dbStats?.promoThrottle || 150) / 1.5}%` }} />
+                      </GlassCard>
+
+                      <GlassCard>
+                        <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                          <Target className="text-blue-400" /> Proof of Growth
+                        </h3>
+                        <p className="text-slate-400 text-sm mb-6">Live audit of global promotions, search rankings, and subscriber acquisition.</p>
+
+                        <div className="space-y-3">
+                          {governance.adProof.map((proof, i) => (
+                            <motion.div
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              key={proof.id || i}
+                              className="p-3 bg-white/5 border border-white/5 rounded-2xl flex items-center justify-between"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
+                                  <LinkIcon size={14} />
+                                </div>
+                                <div>
+                                  <p className="text-[10px] font-black text-white uppercase">{proof.platform}</p>
+                                  <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">{proof.type}</p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-[10px] font-black text-emerald-400 uppercase">{proof.status}</p>
+                                <p className="text-[8px] text-slate-600">{new Date(proof.timestamp).toLocaleTimeString()}</p>
+                              </div>
+                            </motion.div>
+                          ))}
                         </div>
+
+                        <div className="mt-6 p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl">
+                          <div className="flex justify-between items-center mb-1">
+                            <p className="font-bold text-blue-400 uppercase tracking-widest text-xs">Monetization Velocity</p>
+                            <span className="text-blue-400 font-bold">Scaling...</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mt-2">
+                            <motion.div
+                              animate={{ width: ['20%', '95%', '70%'] }}
+                              transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+                              className="h-full bg-blue-500 shadow-[0_0_10px_#3b82f6]"
+                            />
+                          </div>
+                        </div>
+                      </GlassCard>
+                    </div>
+
+                    {/* System Logs */}
+                    <GlassCard>
+                      <h3 className="text-lg font-bold mb-4">Master Audit Logs</h3>
+                      <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                        {dbStats?.logs?.length > 0 ? (
+                          dbStats.logs.map((log, i) => (
+                            <div key={i} className="flex items-center justify-between p-3 bg-white/5 border border-white/5 rounded-lg text-xs">
+                              <div className="flex items-center gap-3">
+                                <div className="w-2 h-2 rounded-full bg-purple-500" />
+                                <span className="text-slate-300 uppercase font-bold">{log.action}</span>
+                              </div>
+                              <span className="text-slate-500">{new Date(log.timestamp).toLocaleString()}</span>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-center py-8 text-slate-500">No recent activity logged</p>
+                        )}
                       </div>
                     </GlassCard>
                   </div>
-
-                  {/* System Logs */}
-                  <GlassCard>
-                    <h3 className="text-lg font-bold mb-4">Master Audit Logs</h3>
-                    <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                      {dbStats?.logs?.length > 0 ? (
-                        dbStats.logs.map((log, i) => (
-                          <div key={i} className="flex items-center justify-between p-3 bg-white/5 border border-white/5 rounded-lg text-xs">
-                            <div className="flex items-center gap-3">
-                              <div className="w-2 h-2 rounded-full bg-purple-500" />
-                              <span className="text-slate-300 uppercase font-bold">{log.action}</span>
-                            </div>
-                            <span className="text-slate-500">{new Date(log.timestamp).toLocaleString()}</span>
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-center py-8 text-slate-500">No recent activity logged</p>
-                      )}
-                    </div>
-                  </GlassCard>
-                </div>
               )}
 
-            </motion.div>
+                </motion.div>
           </AnimatePresence>
         </main>
       </div>
