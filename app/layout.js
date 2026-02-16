@@ -1,25 +1,26 @@
 import "./globals.css";
 import Navbar from "./components/Navbar";
+import { SkipLink } from "./components/SkipLink";
 
 export const metadata = {
-  title: "EliteAniCore | Autonomous Growth Engine",
-  description: "The autonomous SaaS scaling engine. Orchestrate revenue, growth, and engagement.",
+  title: "MythicAmnex — AI-Powered Platform",
+  description: "MythicAmnex helps you automate, analyze, and grow with AI-powered tools. Start free today.",
   keywords: "SaaS automation, autonomous growth, AI scaling, revenue orchestration, Sentinel AI",
   robots: "index, follow",
   alternates: {
-    canonical: 'https://eliteanicore.intelligence',
+    canonical: 'https://mythicamnex.vercel.app',
   },
   openGraph: {
-    title: "EliteAniCore | System Intelligence Redefined",
-    description: "Orchestrate your revenue, growth, and engagement with the world's first autonomous SaaS scaling engine.",
-    url: 'https://eliteanicore.intelligence',
-    siteName: 'EliteAniCore',
+    title: "MythicAmnex — AI-Powered Platform",
+    description: "MythicAmnex helps you automate, analyze, and grow with AI-powered tools. Start free today.",
+    url: 'https://mythicamnex.vercel.app',
+    siteName: 'MythicAmnex',
     images: [
       {
         url: '/assets/slide1.png',
         width: 1200,
         height: 630,
-        alt: 'EliteAniCore Intelligence Dashboard',
+        alt: 'MythicAmnex Intelligence Dashboard',
       },
     ],
     locale: 'en_US',
@@ -36,12 +37,12 @@ export const metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'EliteAniCore',
+    title: 'MythicAmnex',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'EliteAniCore | System Intelligence Redefined',
-    description: 'The autonomous growth engine for modern SaaS.',
+    title: 'MythicAmnex — AI-Powered Platform',
+    description: 'MythicAmnex helps you automate, analyze, and grow with AI-powered tools. Start free today.',
     images: ['/assets/slide1.png'],
   },
 };
@@ -50,6 +51,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body className={`min-h-screen selection:bg-blue-500/30 bg-surface-950 text-white`} suppressHydrationWarning>
+        <SkipLink />
         <Navbar />
         {children}
       </body>

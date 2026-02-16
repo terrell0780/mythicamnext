@@ -14,6 +14,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
+
 // ====================================================================
 // STYLE PRESETS DATA
 // ====================================================================
@@ -495,7 +496,7 @@ export default function EliteAniCoreApp() {
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto bg-slate-950 p-4 md:p-8 custom-scrollbar relative">
+        <main id="main-content" className="flex-1 overflow-y-auto bg-slate-950 p-4 md:p-8 custom-scrollbar relative">
           {/* Mobile Header Toggle */}
           <div className="lg:hidden flex items-center justify-between mb-6">
             <button
