@@ -8,7 +8,8 @@ import {
 import {
   Menu, Search, Users, LogOut, Home, Activity, BarChart3, Wand2, Upload,
   Cloud, X, Paintbrush, ArrowUpCircle, Eraser, Film, DollarSign,
-  Clock, TrendingUp, Sparkles, Palette, Zap, ChevronDown
+  Clock, TrendingUp, Sparkles, Palette, Zap, ChevronDown,
+  Cpu, Target, Power, Link as LinkIcon, Mail, Sun, Moon
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
@@ -380,37 +381,45 @@ export default function EliteAniCoreApp() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     localStorage.removeItem('eliteani_session');
+    await supabase.auth.signOut();
     router.push('/login');
   };
 
-  // Current active preset
   const activePreset = STYLE_PRESETS.find(p => p.id === selectedPreset);
 
   return (
-    <div className="flex h-screen overflow-hidden text-slate-200 font-sans selection:bg-purple-500/30">
+    <div className="flex h-screen overflow-hidden text-slate-200 font-sans selection:bg-purple-500/30 bg-slate-950 relative">
 
-      {/* ================================================================ */}
-      {/* SIDEBAR */}
-      {/* ================================================================ */}
-      <motion.div
-        animate={{ width: sidebarOpen ? 280 : 80 }}
-        className="glass border-r border-slate-700/50 flex flex-col z-20"
+      {/* Mobile Overlay */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSidebarOpen(false)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Sidebar */}
+      <motion.aside
+        initial={false}
+        animate={{
+          width: sidebarOpen ? (typeof window !== 'undefined' && window.innerWidth < 1024 ? '85%' : '280px') : '0px',
+          x: sidebarOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth < 1024 ? -280 : 0),
+          opacity: sidebarOpen ? 1 : (typeof window !== 'undefined' && window.innerWidth < 1024 ? 0 : 1)
+        }}
+        className={`fixed lg:relative z-50 h-full bg-slate-900 border-r border-slate-800 flex flex-col transition-all duration-300 overflow-hidden ${sidebarOpen ? 'p-6' : 'p-0'}`}
       >
-        <div className="p-6 flex items-center justify-between">
-          {sidebarOpen && (
-            <motion.h1
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-2xl font-black bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent"
-            >
-              EliteAniCore
-            </motion.h1>
-          )}
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 hover:bg-white/5 rounded-lg transition">
-            <Menu size={20} />
-          </button>
+        <div className="flex items-center gap-3 mb-10">
+          <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+            <Zap className="text-white" size={24} />
+          </div>
+          <h2 className="text-xl font-black tracking-tighter whitespace-nowrap">EliteAni<span className="text-indigo-500">Core</span></h2>
         </div>
 
         <nav className="flex-1 px-4 space-y-2 mt-4">
@@ -424,7 +433,10 @@ export default function EliteAniCoreApp() {
           ].filter(item => !item.adminOnly || user?.isAdmin).map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => {
+                setActiveTab(item.id);
+                if (window.innerWidth < 1024) setSidebarOpen(false);
+              }}
               className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-200 group relative overflow-hidden ${activeTab === item.id
                 ? 'bg-gradient-to-r from-indigo-600/20 to-purple-600/20 text-white border border-indigo-500/30 shadow-lg shadow-indigo-900/20'
                 : 'text-slate-400 hover:text-white hover:bg-white/5'
@@ -459,11 +471,9 @@ export default function EliteAniCoreApp() {
             {sidebarOpen && <span className="text-sm font-medium">Log Out</span>}
           </button>
         </div>
-      </motion.div>
+      </motion.aside>
 
-      {/* ================================================================ */}
-      {/* MAIN CONTENT */}
-      {/* ================================================================ */}
+      {/* Main Content Area */}
       <div className="flex-1 flex flex-col relative overflow-hidden">
         {/* Background Gradients */}
         <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
@@ -471,30 +481,47 @@ export default function EliteAniCoreApp() {
           <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[100px]" />
         </div>
 
-        {/* Header */}
-        <div className="h-20 border-b border-slate-700/30 flex items-center justify-between px-8 z-10 glass bg-opacity-30 backdrop-blur-md">
-          <h2 className="text-xl font-bold capitalize">{activeTab === 'create' ? 'Create Magic' : activeTab}</h2>
-          <div className="flex items-center gap-4">
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto bg-slate-950 p-4 md:p-8 custom-scrollbar relative">
+          {/* Mobile Header Toggle */}
+          <div className="lg:hidden flex items-center justify-between mb-6">
             <button
-              onClick={toggleTheme}
-              className="p-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition text-slate-400 hover:text-white"
-              title="Toggle Theme"
+              onClick={() => setSidebarOpen(true)}
+              className="p-3 bg-slate-900 border border-slate-800 rounded-xl"
             >
+              <Menu size={20} />
+            </button>
+            <div className="font-black text-sm tracking-tighter">ELITEANI CORE</div>
+            <button onClick={toggleTheme} className="p-3 bg-slate-900 border border-slate-800 rounded-xl text-yellow-400">
               {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="pl-10 pr-4 py-2 rounded-lg bg-black/20 border border-white/10 text-sm focus:outline-none focus:border-indigo-500/50 transition w-64"
-              />
-            </div>
           </div>
-        </div>
 
-        {/* Content Area */}
-        <main className="flex-1 overflow-y-auto p-8 z-10 scroll-smooth">
+          <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+            <div>
+              <h1 className="text-3xl font-black tracking-tight mb-1 capitalize">
+                {activeTab} Hub
+              </h1>
+              <p className="text-slate-400 text-sm font-medium">System status: {governance.killSwitch ? 'HALTED' : 'NOMINAL'}</p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="relative hidden sm:block">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+                <input
+                  type="text"
+                  placeholder="Search intelligence..."
+                  className="pl-10 pr-4 py-2 bg-slate-900/50 border border-slate-800 rounded-xl text-sm outline-none focus:border-indigo-500 transition-all w-64"
+                />
+              </div>
+              <button
+                onClick={toggleTheme}
+                className={`p-3 rounded-xl border transition-all ${theme === 'light' ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-slate-900 text-yellow-400 border-slate-800 hover:bg-slate-800'}`}
+              >
+                {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+              </button>
+            </div>
+          </header>
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -734,111 +761,108 @@ export default function EliteAniCoreApp() {
               )}
 
               {/* ========================================== */}
+              {/* STUDIO EDITOR */}
+              {/* ========================================== */}
+              {activeTab === 'studio' && (
+                <div className="space-y-6">
+                  <GlassCard>
+                    <h2 className="text-3xl font-bold mb-2">Studio Editor</h2>
+                    <p className="text-slate-400 mb-6">Edit and enhance your generated images here.</p>
+                    <p className="text-slate-500">Content for Studio Editor coming soon!</p>
+                  </GlassCard>
+                </div>
+              )}
+
+              {/* ========================================== */}
               {/* GOVERNANCE & PROMO ENGINE */}
               {/* ========================================== */}
               {activeTab === 'governance' && (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="grid grid-cols-1 gap-6">
+                    {/* Left Column: Neural Core */}
+                    <div className="space-y-6">
                       <GlassCard>
                         <div className="flex items-center justify-between mb-6">
                           <div>
                             <h3 className="text-2xl font-black flex items-center gap-3">
-                              <Cpu className="text-indigo-400 w-8 h-8" /> Neural Core <span className="text-xs bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded-full uppercase tracking-tighter">Owner Only</span>
+                              <Cpu className="text-indigo-400 w-8 h-8" /> Neural Core
                             </h3>
-                            <p className="text-slate-400 text-sm mt-1">Direct orchestration of AI deployment velocity and learning optimization.</p>
+                            <p className="text-slate-400 text-sm mt-1">Direct orchestration of AI velocity and optimization.</p>
                           </div>
                           <div className={`px-4 py-2 rounded-2xl border transition-all ${governance.killSwitch ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'}`}>
                             <div className="flex items-center gap-2 font-black text-xs uppercase tracking-widest">
                               <div className={`w-2 h-2 rounded-full animate-pulse ${governance.killSwitch ? 'bg-red-400' : 'bg-emerald-400'}`} />
-                              {governance.killSwitch ? 'System Halted' : 'Neural Core Active'}
+                              {governance.killSwitch ? 'System Halted' : 'Active'}
                             </div>
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                          {/* Speed Slider */}
-                          <div className="p-6 bg-white/5 border border-white/5 rounded-[2rem] space-y-4">
+                        <div className="space-y-6 mb-8">
+                          <div className="p-6 bg-white/5 border border-white/5 rounded-3xl space-y-4">
                             <div className="flex justify-between items-center">
                               <div className="flex items-center gap-3">
                                 <Zap className="text-yellow-400" size={20} />
-                                <span className="font-bold text-sm uppercase tracking-widest">Deployment Speed</span>
+                                <span className="font-bold text-sm uppercase">AI Speed</span>
                               </div>
                               <span className="text-2xl font-black text-indigo-400">{governance.aiSpeed}%</span>
                             </div>
                             <input
                               type="range"
-                              min="0"
-                              max="100"
+                              min="0" max="100"
                               value={governance.aiSpeed}
                               onChange={(e) => updateGovernance('set_speed', parseInt(e.target.value))}
                               className="w-full h-2 bg-slate-800 rounded-full appearance-none cursor-pointer accent-indigo-500"
                             />
-                            <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase tracking-tighter">
-                              <span>Conservative</span>
-                              <span>Hyperscale</span>
-                            </div>
                           </div>
 
-                          {/* Success Slider */}
-                          <div className="p-6 bg-white/5 border border-white/5 rounded-[2rem] space-y-4">
+                          <div className="p-6 bg-white/5 border border-white/5 rounded-3xl space-y-4">
                             <div className="flex justify-between items-center">
                               <div className="flex items-center gap-3">
                                 <TrendingUp className="text-emerald-400" size={20} />
-                                <span className="font-bold text-sm uppercase tracking-widest">Learning Optimization</span>
+                                <span className="font-bold text-sm uppercase">Optimization</span>
                               </div>
                               <span className="text-2xl font-black text-emerald-400">{governance.learningRate}%</span>
                             </div>
                             <input
                               type="range"
-                              min="0"
-                              max="100"
+                              min="0" max="100"
                               value={governance.learningRate}
                               onChange={(e) => updateGovernance('set_learning', parseInt(e.target.value))}
                               className="w-full h-2 bg-slate-800 rounded-full appearance-none cursor-pointer accent-emerald-500"
                             />
-                            <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase tracking-tighter">
-                              <span>Low Logic</span>
-                              <span>Maximum Success</span>
-                            </div>
                           </div>
                         </div>
 
-                        <div className="flex flex-col md:flex-row gap-4">
-                          <button
-                            onClick={() => updateGovernance('toggle_killswitch', !governance.killSwitch)}
-                            className={`flex-1 py-4 rounded-2xl font-black text-white transition-all transform active:scale-[0.98] shadow-2xl flex items-center justify-center gap-3 ${governance.killSwitch ? 'bg-emerald-600 shadow-emerald-900/40' : 'bg-red-600 shadow-red-900/40'}`}
-                          >
-                            <Power size={20} /> {governance.killSwitch ? 'Re-Engage Neural Core' : 'Global Emergency Killswitch'}
-                          </button>
-                        </div>
+                        <button
+                          onClick={() => updateGovernance('toggle_killswitch', !governance.killSwitch)}
+                          className={`w-full py-4 rounded-2xl font-black text-white transition-all transform active:scale-[0.98] shadow-2xl flex items-center justify-center gap-3 ${governance.killSwitch ? 'bg-emerald-600 shadow-emerald-900/40' : 'bg-red-600 shadow-red-900/40'}`}
+                        >
+                          <Power size={20} /> {governance.killSwitch ? 'Re-Engage Neural Core' : 'Global Emergency Killswitch'}
+                        </button>
                       </GlassCard>
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <GlassCard>
                         <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                           <Sparkles className="text-purple-400" /> AI Promo Engine
                         </h3>
-                        <p className="text-slate-400 text-sm mb-6">Autonomous orchestration for content distribution and revenue scaling.</p>
                         <PromotionPulse pulses={promoPulses} />
-                        <div className="space-y-3">
-                          <button
-                            onClick={handleGeneratePromo}
-                            disabled={loading}
-                            className="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl font-bold hover:from-purple-500 hover:to-indigo-500 transition shadow-lg shadow-purple-900/40 flex items-center justify-center gap-2"
-                          >
-                            <Sparkles size={18} /> Generate Master Promo
-                          </button>
-                        </div>
+                        <button
+                          onClick={handleGeneratePromo}
+                          disabled={loading}
+                          className="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl font-bold hover:from-purple-500 hover:to-indigo-500 transition shadow-lg shadow-purple-900/40 flex items-center justify-center gap-2"
+                        >
+                          {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Sparkles size={18} />}
+                          Generate Master Promo
+                        </button>
                       </GlassCard>
+                    </div>
 
+                    {/* Right Column: Proof of Growth & Logs */}
+                    <div className="space-y-6">
                       <GlassCard>
                         <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                           <Target className="text-blue-400" /> Proof of Growth
                         </h3>
-                        <p className="text-slate-400 text-sm mb-6">Live audit of global promotions, search rankings, and subscriber acquisition.</p>
-
                         <div className="space-y-3">
                           {governance.adProof.map((proof, i) => (
                             <motion.div
@@ -858,7 +882,7 @@ export default function EliteAniCoreApp() {
                               </div>
                               <div className="text-right">
                                 <p className="text-[10px] font-black text-emerald-400 uppercase">{proof.status}</p>
-                                <p className="text-[8px] text-slate-600">{new Date(proof.timestamp).toLocaleTimeString()}</p>
+                                <p className="text-[8px] text-slate-600 font-bold">{new Date(proof.timestamp).toLocaleTimeString()}</p>
                               </div>
                             </motion.div>
                           ))}
@@ -878,45 +902,38 @@ export default function EliteAniCoreApp() {
                           </div>
                         </div>
                       </GlassCard>
-                    </div>
 
-                    {/* System Logs */}
-                    <GlassCard>
-                      <h3 className="text-lg font-bold mb-4">Master Audit Logs</h3>
-                      <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                        {dbStats?.logs?.length > 0 ? (
-                          dbStats.logs.map((log, i) => (
-                            <div key={i} className="flex items-center justify-between p-3 bg-white/5 border border-white/5 rounded-lg text-xs">
-                              <div className="flex items-center gap-3">
-                                <div className="w-2 h-2 rounded-full bg-purple-500" />
-                                <span className="text-slate-300 uppercase font-bold">{log.action}</span>
+                      <GlassCard>
+                        <h3 className="text-lg font-bold mb-4">Master Audit Logs</h3>
+                        <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                          {dbStats?.logs?.length > 0 ? (
+                            dbStats.logs.map((log, i) => (
+                              <div key={i} className="flex items-center justify-between p-3 bg-white/5 border border-white/5 rounded-lg text-xs">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-2 h-2 rounded-full bg-purple-500" />
+                                  <span className="text-slate-300 uppercase font-bold">{log.action}</span>
+                                </div>
+                                <span className="text-slate-500">{new Date(log.timestamp).toLocaleTimeString()}</span>
                               </div>
-                              <span className="text-slate-500">{new Date(log.timestamp).toLocaleString()}</span>
-                            </div>
-                          ))
-                        ) : (
-                          <p className="text-center py-8 text-slate-500">No recent activity logged</p>
-                        )}
-                      </div>
-                    </GlassCard>
+                            ))
+                          ) : (
+                            <p className="text-center py-8 text-slate-500 italic">No activity logs recorded.</p>
+                          )}
+                        </div>
+                      </GlassCard>
+                    </div>
                   </div>
+                </div>
               )}
-
-                </motion.div>
+            </motion.div>
           </AnimatePresence>
         </main>
       </div>
 
-      {/* ================================================================ */}
-      {/* IMAGE MODAL (Studio Editor Overlay) */}
-      {/* ================================================================ */}
+      {/* Studio Modal */}
       <AnimatePresence>
         {selectedImage && (
-          <ImageModal
-            image={selectedImage}
-            onClose={() => setSelectedImage(null)}
-            onAction={handleStudioAction}
-          />
+          <ImageModal image={selectedImage} onClose={() => setSelectedImage(null)} onAction={handleStudioAction} />
         )}
       </AnimatePresence>
     </div>

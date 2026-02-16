@@ -25,6 +25,19 @@ export const metadata = {
     locale: 'en_US',
     type: "website",
   },
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: 'cover',
+  },
+  themeColor: '#4f46e5',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'EliteAniCore',
+  },
   twitter: {
     card: 'summary_large_image',
     title: 'EliteAniCore | System Intelligence Redefined',

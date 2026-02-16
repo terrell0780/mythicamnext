@@ -7,8 +7,8 @@ import { Menu, X, Rocket, Cpu } from "lucide-react";
 
 const links = [
     { name: "Intelligence", href: "/" },
-    { name: "Core Features", href: "/features" },
     { name: "Monetization", href: "/pricing" },
+    { name: "About Core", href: "/about" },
 ];
 
 export default function Navbar() {
