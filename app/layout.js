@@ -1,10 +1,14 @@
 import "./globals.css";
 import Navbar from "./components/Navbar";
-import PromotionOverlay from "./components/PromotionOverlay";
 
 export const metadata = {
   title: "EliteAniCore | Autonomous Growth Engine",
   description: "The autonomous SaaS scaling engine. Orchestrate revenue, growth, and engagement.",
+  keywords: "SaaS automation, autonomous growth, AI scaling, revenue orchestration, Sentinel AI",
+  robots: "index, follow",
+  alternates: {
+    canonical: 'https://eliteanicore.intelligence',
+  },
   openGraph: {
     title: "EliteAniCore | System Intelligence Redefined",
     description: "Orchestrate your revenue, growth, and engagement with the world's first autonomous SaaS scaling engine.",
@@ -35,7 +39,6 @@ export default function RootLayout({ children }) {
       <body className={`min-h-screen selection:bg-blue-500/30 bg-surface-950 text-white`} suppressHydrationWarning>
         <Navbar />
         {children}
-        <PromotionOverlay />
       </body>
     </html>
   );

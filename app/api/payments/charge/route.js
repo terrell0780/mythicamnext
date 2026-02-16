@@ -22,7 +22,7 @@ export async function POST(request) {
             date: new Date().toISOString()
         };
 
-        // storage.addTransaction(tx); // TODO: Add method to storage.js if needed
+        storage.addTransaction(tx);
 
         return NextResponse.json({ success: true, transaction: tx });
 

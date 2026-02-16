@@ -124,6 +124,42 @@ const ImageModal = ({ image, onClose, onAction }) => {
 };
 
 // ====================================================================
+// PROMOTION PULSE COMPONENT
+// ====================================================================
+const PromotionPulse = ({ pulses }) => {
+  const channels = [
+    { id: 'socialPost', label: 'Social', icon: TrendingUp, color: 'text-pink-400' },
+    { id: 'blog', label: 'Search/SEO', icon: Search, color: 'text-blue-400' },
+    { id: 'coldEmail', label: 'Email Outreach', icon: Mail, color: 'text-emerald-400' },
+  ];
+
+  return (
+    <div className="grid grid-cols-3 gap-4 mb-6">
+      {channels.map(chan => {
+        const isActive = pulses.some(p => p.channel === chan.id);
+        return (
+          <div key={chan.id} className="p-4 rounded-xl bg-slate-900/50 border border-slate-700/50 flex flex-col items-center justify-center relative overflow-hidden group">
+            {isActive && (
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0.5 }}
+                animate={{ scale: 1.5, opacity: 0 }}
+                transition={{ repeat: Infinity, duration: 1.5 }}
+                className={`absolute inset-0 bg-current opacity-10 rounded-full ${chan.color}`}
+              />
+            )}
+            <chan.icon size={24} className={`${chan.color} mb-2 ${isActive ? 'animate-bounce' : 'opacity-40'}`} />
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{chan.label}</p>
+            {isActive && (
+              <p className="text-[10px] text-emerald-400 mt-1 font-bold animate-pulse">DEPLOYING...</p>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+// ====================================================================
 // MAIN APP
 // ====================================================================
 export default function EliteAniCoreApp() {
@@ -137,8 +173,11 @@ export default function EliteAniCoreApp() {
   const [selectedPreset, setSelectedPreset] = useState('none');
   const [selectedImage, setSelectedImage] = useState(null);
   const [presetsOpen, setPresetsOpen] = useState(false);
+  const [theme, setTheme] = useState('dark');
   const [user, setUser] = useState(null);
   const router = useRouter();
+
+  const [promoPulses, setPromoPulses] = useState([]);
 
   // Session Check & Data Fetch
   useEffect(() => {
@@ -147,10 +186,35 @@ export default function EliteAniCoreApp() {
       router.push('/login');
       return;
     }
-    setUser(JSON.parse(session));
+    const userData = JSON.parse(session);
+    setUser(userData);
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('eliteani_theme') || 'dark';
+    setTheme(savedTheme);
+    document.documentElement.classList.toggle('light-mode', savedTheme === 'light');
+
     fetchStats();
     fetchGenerations();
+
+    // Initial pulses fetch
+    fetchPulses();
+
+    // Set up polling for real-time updates
+    const interval = setInterval(() => {
+      fetchStats();
+      fetchPulses();
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [router]);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    localStorage.setItem('eliteani_theme', newTheme);
+    document.documentElement.classList.toggle('light-mode', newTheme === 'light');
+  };
 
   const fetchStats = async () => {
     try {
@@ -168,7 +232,7 @@ export default function EliteAniCoreApp() {
       const data = await res.json();
       if (data.success) {
         setGeneratedImages(data.generations.map(g => ({
-          url: g.image_url,
+          url: g.url,
           prompt: g.prompt,
           date: new Date(g.created_at).toLocaleTimeString()
         })));
@@ -328,22 +392,22 @@ export default function EliteAniCoreApp() {
             { id: 'dashboard', label: 'Dashboard', icon: Home },
             { id: 'create', label: 'Create Magic', icon: Wand2 },
             { id: 'studio', label: 'Studio Editor', icon: Palette },
-            { id: 'governance', label: 'Governance', icon: Activity },
-            { id: 'users', label: 'Users & CRM', icon: Users },
+            { id: 'governance', label: 'Governance', icon: Activity, adminOnly: true },
+            { id: 'users', label: 'Users & CRM', icon: Users, adminOnly: true },
             { id: 'pricing', label: 'Revenue Loops', icon: DollarSign },
-          ].map((item) => (
+          ].filter(item => !item.adminOnly || user?.isAdmin).map((item) => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
               className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-200 group relative overflow-hidden ${activeTab === item.id
-                ? 'bg-gradient-to-r from-purple-600/20 to-indigo-600/20 text-white border border-purple-500/30 shadow-lg shadow-purple-900/20'
+                ? 'bg-gradient-to-r from-indigo-600/20 to-purple-600/20 text-white border border-indigo-500/30 shadow-lg shadow-indigo-900/20'
                 : 'text-slate-400 hover:text-white hover:bg-white/5'
                 }`}
             >
-              <item.icon size={22} className={activeTab === item.id ? "text-purple-400" : ""} />
+              <item.icon size={22} className={activeTab === item.id ? "text-indigo-400" : ""} />
               {sidebarOpen && <span className="font-medium">{item.label}</span>}
               {activeTab === item.id && (
-                <motion.div layoutId="activeTab" className="absolute left-0 w-1 h-8 bg-purple-500 rounded-r-full" />
+                <motion.div layoutId="activeTab" className="absolute left-0 w-1 h-8 bg-indigo-500 rounded-r-full" />
               )}
             </button>
           ))}
@@ -351,13 +415,13 @@ export default function EliteAniCoreApp() {
 
         <div className="p-4 border-t border-slate-700/30">
           <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 border border-white/5">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center font-bold">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold">
               {user?.name?.charAt(0) || 'U'}
             </div>
             {sidebarOpen && (
               <div className="flex-1 overflow-hidden">
                 <p className="text-sm font-semibold truncate">{user?.name || 'User'}</p>
-                <p className="text-xs text-slate-400 truncate">{user?.isAdmin ? 'Admin' : 'Active User'}</p>
+                <p className="text-xs text-slate-400 truncate tracking-tight">{user?.isAdmin ? 'Owner Access' : 'Active User'}</p>
               </div>
             )}
           </div>
@@ -377,20 +441,27 @@ export default function EliteAniCoreApp() {
       <div className="flex-1 flex flex-col relative overflow-hidden">
         {/* Background Gradients */}
         <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
-          <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[100px]" />
-          <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[100px]" />
+          <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[100px]" />
+          <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[100px]" />
         </div>
 
         {/* Header */}
         <div className="h-20 border-b border-slate-700/30 flex items-center justify-between px-8 z-10 glass bg-opacity-30 backdrop-blur-md">
           <h2 className="text-xl font-bold capitalize">{activeTab === 'create' ? 'Create Magic' : activeTab}</h2>
-          <div className="flex gap-4">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={toggleTheme}
+              className="p-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition text-slate-400 hover:text-white"
+              title="Toggle Theme"
+            >
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input
                 type="text"
                 placeholder="Search..."
-                className="pl-10 pr-4 py-2 rounded-lg bg-black/20 border border-white/10 text-sm focus:outline-none focus:border-purple-500/50 transition w-64"
+                className="pl-10 pr-4 py-2 rounded-lg bg-black/20 border border-white/10 text-sm focus:outline-none focus:border-indigo-500/50 transition w-64"
               />
             </div>
           </div>
@@ -413,13 +484,24 @@ export default function EliteAniCoreApp() {
               {/* ========================================== */}
               {activeTab === 'dashboard' && (
                 <div className="space-y-6">
-                  {/* ROI Stats Row */}
+                  {/* Sentinel & ROI Stats Row */}
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <GlassCard className="relative overflow-hidden border-indigo-500/30">
+                      <div className="absolute top-0 right-0 p-2">
+                        <div className={`w-2 h-2 rounded-full animate-pulse ${dbStats?.governance?.sentinel?.status === 'Active' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'bg-blue-500'}`} />
+                      </div>
+                      <div className="flex justify-between items-start mb-2">
+                        <p className="text-sm font-medium text-slate-400">Sentinel AI</p>
+                        <Activity size={16} className="text-indigo-400" />
+                      </div>
+                      <div className="text-2xl font-bold text-white mb-1">{dbStats?.governance?.sentinel?.status || 'Online'}</div>
+                      <p className="text-xs text-indigo-400">Health: {dbStats?.governance?.sentinel?.healthScore || 100}%</p>
+                    </GlassCard>
+
                     {[
-                      { label: "Total Revenue", value: dbStats ? `$${(dbStats.revenueToday || 4230).toLocaleString()}` : "$4,230", trend: "+20.1%", color: "text-emerald-400", icon: DollarSign },
-                      { label: "Time Saved", value: "487 hrs", trend: "vs. manual design", color: "text-blue-400", icon: Clock },
-                      { label: "Cost / Asset", value: "$0.12", trend: "-94% vs. freelancer", color: "text-purple-400", icon: TrendingUp },
-                      { label: "ROI Multiplier", value: "47x", trend: "Return on Investment", color: "text-amber-400", icon: Zap }
+                      { label: "Total Revenue", value: dbStats ? `$${(dbStats.revenueToday || 0).toLocaleString()}` : "$0", trend: "Live Tracking", color: "text-emerald-400", icon: DollarSign },
+                      { label: "Active Users", value: dbStats?.activeUsers?.toLocaleString() || "0", trend: "Real-time", color: "text-blue-400", icon: Users },
+                      { label: "MRR", value: dbStats ? `$${(dbStats.mrr || 0).toLocaleString()}` : "$0", trend: "Subscription Rev", color: "text-purple-400", icon: TrendingUp },
                     ].map((stat, i) => (
                       <GlassCard key={i}>
                         <div className="flex justify-between items-start mb-2">
@@ -637,6 +719,8 @@ export default function EliteAniCoreApp() {
                       </h3>
                       <p className="text-slate-400 text-sm mb-6">Autonomous orchestration for content distribution and revenue scaling.</p>
 
+                      <PromotionPulse pulses={promoPulses} />
+
                       <div className="space-y-3">
                         <button
                           onClick={handleGeneratePromo}
@@ -671,6 +755,28 @@ export default function EliteAniCoreApp() {
                         >
                           <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all ${dbStats?.killSwitch ? 'left-7' : 'left-1'}`} />
                         </button>
+                      </div>
+
+                      <div className="p-4 bg-indigo-500/5 border border-indigo-500/10 rounded-xl mb-4">
+                        <div className="flex items-center gap-3 mb-3">
+                          <Rocket className="text-indigo-400" size={18} />
+                          <p className="font-bold text-indigo-400 uppercase tracking-widest text-xs">Intelligence Lab</p>
+                        </div>
+                        <p className="text-slate-400 text-xs mb-4">Your orchestration logic is performing at 98% efficiency. Deploy a clone to scale new revenue loops.</p>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => alert("Intelligence Clone Deployed to Sandbox Partition.")}
+                            className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold rounded-lg transition"
+                          >
+                            Deploy Clone
+                          </button>
+                          <button
+                            onClick={() => alert("Architecture parameters exported to system logs.")}
+                            className="px-3 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg border border-white/10 transition"
+                          >
+                            <Share2 size={12} />
+                          </button>
+                        </div>
                       </div>
 
                       <div className="p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl">

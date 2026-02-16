@@ -19,6 +19,10 @@ export async function POST(req) {
             return NextResponse.json({ success: false, message: 'Price ID is required' }, { status: 400 });
         }
 
+        // Fetch price details to determine mode
+        const price = await stripe.prices.retrieve(priceId);
+        const mode = price.recurring ? 'subscription' : 'payment';
+
         // Create Checkout Session
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
@@ -28,7 +32,7 @@ export async function POST(req) {
                     quantity: 1,
                 },
             ],
-            mode: 'subscription',
+            mode: mode,
             success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/?success=true`,
             cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/pricing/?canceled=true`,
             customer_email: userEmail,

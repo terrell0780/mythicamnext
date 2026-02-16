@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { storage } from '@/lib/storage';
 
 export async function POST(request) {
     try {
@@ -17,6 +18,8 @@ export async function POST(request) {
             bankName,
             date: new Date().toISOString()
         };
+
+        storage.addTransaction(tx);
 
         return NextResponse.json({ success: true, transaction: tx });
 

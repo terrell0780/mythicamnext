@@ -6,21 +6,33 @@ export async function POST(request) {
         const { email, pin } = await request.json();
         const admin = storage.getAdmin();
 
-        if (email === admin.email && pin === admin.pin) {
+        if (email.toUpperCase() === admin.email.toUpperCase() && pin === admin.pin) {
             return NextResponse.json({
                 success: true,
-                user: { email, name: admin.name, isAdmin: true }
+                user: { email: admin.email, name: admin.name, isAdmin: true }
             });
-        } else if (email === admin.email) {
-            return NextResponse.json({ success: false, message: 'Invalid PIN' }, { status: 401 });
-        } else {
-            // Allow any other email as a "User" for demo purposes
+        } else if (email.toUpperCase() === admin.email.toUpperCase()) {
+            return NextResponse.json({
+                success: false,
+                message: 'Invalid Master PIN. Entry Denied.'
+            }, { status: 401 });
+        } else if (pin === 'GUEST_BYPASS' || !pin) {
+            // Normal User Access
             return NextResponse.json({
                 success: true,
                 user: { email, name: email.split('@')[0], isAdmin: false }
             });
+        } else {
+            return NextResponse.json({
+                success: false,
+                message: 'Access Denied.'
+            }, { status: 401 });
         }
     } catch (error) {
-        return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
+        console.error('Login API error:', error);
+        return NextResponse.json({
+            success: false,
+            message: 'Internal Control Center error. Please try again later.'
+        }, { status: 500 });
     }
 }

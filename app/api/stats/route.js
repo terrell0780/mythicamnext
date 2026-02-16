@@ -23,8 +23,11 @@ export async function GET() {
 
     // To be safe, I will return { success: true, stats: stats } which matches the frontend code check.
 
+    const governance = storage.getGovernance();
+
     return NextResponse.json({
         success: true,
-        stats: stats
+        stats: stats,
+        governance: governance
     });
 }

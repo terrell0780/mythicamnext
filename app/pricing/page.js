@@ -26,13 +26,13 @@ const tiers = [
         highlight: true
     },
     {
-        name: "Enterprise",
-        price: "Custom",
-        description: "Full-scale autonomous operation for multi-vector platforms.",
-        features: ["Unlimited Nodes", "Predictive Yield Analysis", "24/7 Dedicated Support", "White-label Options", "Dedicated Infrastructure"],
+        name: "Elite Source Private",
+        price: "$999",
+        description: "Full Ownership. Perpetual Source Code License for absolute orchestration control.",
+        features: ["Full Source Code Access", "Private Infrastructure License", "Unlimited Intelligence Nodes", "Quantum Yield Orchestration", "Zero-Latency Priority Support", "White-label Commercial Rights"],
         icon: Crown,
         color: "text-emerald-400",
-        button: "Contact Sales",
+        button: "Claim Ownership",
         highlight: false
     }
 ];
@@ -41,13 +41,23 @@ export default function Pricing() {
     const [loading, setLoading] = React.useState(false);
 
     const handleCheckout = async (tier) => {
+        const session = localStorage.getItem('eliteani_session');
+        if (!session) {
+            alert('Please login to purchase a plan.');
+            return;
+        }
+
+        const userData = JSON.parse(session);
         setLoading(tier.name);
+
         try {
-            // Mock price IDs for demonstration - user should replace these
+            // ==========================================================
+            // ACTION REQUIRED: Replace these with your real Stripe Price IDs
+            // ==========================================================
             const priceIds = {
-                'Starter': 'price_starter_id',
-                'Business': 'price_business_id',
-                'Enterprise': 'price_enterprise_id'
+                'Starter': 'price_1T1SzKB278CBNQbTCOJwI3TA',
+                'Business': 'price_1T1T0iB278CBNQbTvYq2zRjo',
+                'Elite Source Private': 'price_1T1T48B278CBNQbTt0LnWMzs'
             };
 
             const res = await fetch('/api/stripe/checkout', {
@@ -55,8 +65,8 @@ export default function Pricing() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     priceId: priceIds[tier.name],
-                    userId: 'user_uuid_here', // In a real app, get this from Supabase Session
-                    userEmail: 'user@example.com'
+                    userId: userData.id || userData.email, // Use ID if available, fallback to email
+                    userEmail: userData.email
                 })
             });
 
