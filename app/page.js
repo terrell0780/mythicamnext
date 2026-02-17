@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { safeLocale } from '@/lib/format';
 
 
 // ====================================================================
@@ -566,9 +567,9 @@ export default function EliteAniCoreApp() {
                     </GlassCard>
 
                     {[
-                      { label: "Total Revenue", value: dbStats ? `$${(dbStats.revenueToday || 0).toLocaleString()}` : "$0", trend: "Live Tracking", color: "text-emerald-400", icon: DollarSign },
-                      { label: "Active Users", value: dbStats?.activeUsers?.toLocaleString() || "0", trend: "Real-time", color: "text-blue-400", icon: Users },
-                      { label: "MRR", value: dbStats ? `$${(dbStats.mrr || 0).toLocaleString()}` : "$0", trend: "Subscription Rev", color: "text-purple-400", icon: TrendingUp },
+                      { label: "Total Revenue", value: `$${safeLocale(dbStats?.revenueToday)}`, trend: "Live Tracking", color: "text-emerald-400", icon: DollarSign },
+                      { label: "Active Users", value: safeLocale(dbStats?.activeUsers, '0'), trend: "Real-time", color: "text-blue-400", icon: Users },
+                      { label: "MRR", value: `$${safeLocale(dbStats?.mrr)}`, trend: "Subscription Rev", color: "text-purple-400", icon: TrendingUp },
                     ].map((stat, i) => (
                       <GlassCard key={i}>
                         <div className="flex justify-between items-start mb-2">
