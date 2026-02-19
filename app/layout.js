@@ -26,14 +26,7 @@ export const metadata = {
     locale: 'en_US',
     type: "website",
   },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: 'cover',
-  },
-  themeColor: '#4f46e5',
+
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -45,6 +38,15 @@ export const metadata = {
     description: 'MythicAmnex helps you automate, analyze, and grow with AI-powered tools. Start free today.',
     images: ['/assets/slide1.png'],
   },
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+  themeColor: '#4f46e5',
 };
 
 export default function RootLayout({ children }) {
