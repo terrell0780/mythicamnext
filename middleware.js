@@ -13,7 +13,6 @@ export async function middleware(request) {
 
     if (!canInitialize ||
         process.env.NEXT_PUBLIC_SUPABASE_URL === 'YOUR_SUPABASE_URL' ||
-        process.env.NEXT_PUBLIC_SUPABASE_URL.includes('xyzcompany') ||
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.endsWith('...')) {
         return response;
     }
