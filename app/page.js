@@ -170,45 +170,45 @@ export default function EliteAniCoreApp() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-950 text-slate-200">
+    <div className="flex h-screen overflow-hidden bg-surface-950 text-slate-200">
       {/* Sidebar */}
       <aside className={`bg-slate-900 border-r border-slate-800 transition-all ${sidebarOpen ? 'w-64' : 'w-0'} overflow-hidden`}>
         <div className="p-6">EliteAniCore</div>
         <nav className="flex flex-col gap-2 p-2">
-          {['dashboard','create'].map(tab => (
-            <button key={tab} onClick={() => setActiveTab(tab)} className={`p-2 rounded ${activeTab===tab?'bg-indigo-600':''}`}>{tab}</button>
+          {['dashboard', 'create'].map(tab => (
+            <button key={tab} onClick={() => setActiveTab(tab)} className={`p-2 rounded ${activeTab === tab ? 'bg-indigo-600' : ''}`}>{tab}</button>
           ))}
         </nav>
       </aside>
 
       {/* Main */}
       <main className="flex-1 p-6 overflow-y-auto relative">
-        {activeTab==='dashboard' && (
+        {activeTab === 'dashboard' && (
           <div>
             <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
           </div>
         )}
-        {activeTab==='create' && (
+        {activeTab === 'create' && (
           <div>
             <h1 className="text-2xl font-bold mb-4">Create Magic</h1>
             <div className="mb-2 flex gap-2">
               {STYLE_PRESETS.map(p => (
-                <button key={p.id} onClick={()=>setSelectedPreset(p.id)} className={`px-2 py-1 rounded ${selectedPreset===p.id?'bg-indigo-500':''}`}>{p.label}</button>
+                <button key={p.id} onClick={() => setSelectedPreset(p.id)} className={`px-2 py-1 rounded ${selectedPreset === p.id ? 'bg-indigo-500' : ''}`}>{p.label}</button>
               ))}
             </div>
-            <input value={prompt} onChange={e=>setPrompt(e.target.value)} placeholder="Describe your scene..." className="p-2 rounded bg-slate-800 w-full mb-2" />
+            <input value={prompt} onChange={e => setPrompt(e.target.value)} placeholder="Describe your scene..." className="p-2 rounded bg-slate-800 w-full mb-2" />
             <button onClick={handleGenerate} className="px-4 py-2 bg-indigo-600 rounded">Generate</button>
 
             <div className="grid grid-cols-3 gap-2 mt-4">
               {generatedImages.map((img, i) => (
-                <img key={i} src={img.url} alt={img.prompt} onClick={()=>setSelectedImage(img)} className="rounded cursor-pointer" />
+                <img key={i} src={img.url} alt={img.prompt} onClick={() => setSelectedImage(img)} className="rounded cursor-pointer" />
               ))}
             </div>
           </div>
         )}
 
         <AnimatePresence>
-          {selectedImage && <ImageModal image={selectedImage} onClose={()=>setSelectedImage(null)} onAction={async()=>{}} />}
+          {selectedImage && <ImageModal image={selectedImage} onClose={() => setSelectedImage(null)} onAction={async () => { }} />}
         </AnimatePresence>
       </main>
     </div>

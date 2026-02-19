@@ -1,6 +1,9 @@
 import "./globals.css";
+import { Inter } from 'next/font/google';
 import Navbar from "./components/Navbar";
 import { SkipLink } from "./components/SkipLink";
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata = {
   title: "MythicAmnex — AI-Powered Platform",
@@ -51,8 +54,8 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
-      <body className={`min-h-screen selection:bg-blue-500/30 bg-surface-950 text-white`} suppressHydrationWarning>
+    <html lang="en" className={`scroll-smooth ${inter.variable}`} suppressHydrationWarning>
+      <body className={`min-h-screen bg-surface-950 text-white antialiased`} suppressHydrationWarning>
         <SkipLink />
         <Navbar />
         {children}

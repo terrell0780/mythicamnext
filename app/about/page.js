@@ -7,7 +7,7 @@ import Link from 'next/link';
 
 export default function AboutPage() {
     return (
-        <div className="min-h-screen bg-slate-950 text-white selection:bg-indigo-500/30">
+        <div className="min-h-screen bg-surface-950 text-white">
             {/* Hero Section */}
             <section className="relative pt-32 pb-20 overflow-hidden">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-indigo-600/10 blur-[120px] rounded-full opacity-50 pointer-events-none" />
@@ -111,7 +111,7 @@ export default function AboutPage() {
                                         </div>
                                         <div className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-[10px] font-black rounded-full">ACTIVE</div>
                                     </div>
-                                    <div className="h-40 bg-slate-950/50 rounded-2xl border border-white/5 overflow-hidden flex items-end p-4">
+                                    <div className="h-40 bg-surface-950/50 rounded-2xl border border-white/5 overflow-hidden flex items-end p-4">
                                         <div className="flex-1 flex gap-1 items-end">
                                             {[40, 70, 45, 90, 65, 80, 50, 95, 30].map((h, i) => (
                                                 <motion.div

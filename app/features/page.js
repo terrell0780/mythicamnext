@@ -102,7 +102,7 @@ export default function Features() {
                         </div>
                         <div className="w-full lg:w-1/3">
                             <div className="aspect-square rounded-[40px] bg-gradient-to-br from-blue-600 to-cyan-400 p-1 flex items-center justify-center relative group">
-                                <div className="absolute inset-2 bg-slate-950 rounded-[36px] flex items-center justify-center transition-all duration-700 group-hover:inset-1">
+                                <div className="absolute inset-2 bg-surface-950 rounded-[36px] flex items-center justify-center transition-all duration-700 group-hover:inset-1">
                                     <div className="text-center">
                                         <div className="text-6xl font-black mb-2">99.9<span className="text-blue-400 text-4xl">%</span></div>
                                         <div className="text-slate-500 font-bold uppercase tracking-widest text-sm">Autonomy Index</div>
