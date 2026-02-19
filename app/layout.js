@@ -8,12 +8,12 @@ export const metadata = {
   keywords: "SaaS automation, autonomous growth, AI scaling, revenue orchestration, Sentinel AI",
   robots: "index, follow",
   alternates: {
-    canonical: 'https://mythicamnex.vercel.app',
+    canonical: 'https://zevanto.shop',
   },
   openGraph: {
     title: "MythicAmnex — AI-Powered Platform",
     description: "MythicAmnex helps you automate, analyze, and grow with AI-powered tools. Start free today.",
-    url: 'https://mythicamnex.vercel.app',
+    url: 'https://zevanto.shop',
     siteName: 'MythicAmnex',
     images: [
       {
