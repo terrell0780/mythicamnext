@@ -11,12 +11,12 @@ export const metadata = {
   keywords: "SaaS automation, autonomous growth, AI scaling, revenue orchestration, Sentinel AI",
   robots: "index, follow",
   alternates: {
-    canonical: 'https://zevanto.shop',
+    canonical: 'https://zevvanto.shop',
   },
   openGraph: {
     title: "MythicAmnex — AI-Powered Platform",
     description: "MythicAmnex helps you automate, analyze, and grow with AI-powered tools. Start free today.",
-    url: 'https://zevanto.shop',
+    url: 'https://zevvanto.shop',
     siteName: 'MythicAmnex',
     images: [
       {

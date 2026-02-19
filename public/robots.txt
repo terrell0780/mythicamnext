@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://mythicamnext.vercel.app/sitemap.xml
+Sitemap: https://zevvanto.shop/sitemap.xml
