@@ -1,0 +1,178 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import {
+  Zap,
+  CreditCard,
+  ArrowUpRight,
+  Shield,
+  Clock,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+
+export const DashboardHome: React.FC = () => {
+  const [date, setDate] = useState<string>("");
+
+  useEffect(() => {
+    setDate(new Date().toLocaleDateString());
+  }, []);
+
+  const stats = [
+    { label: "Net Revenue (7d)", val: "$28,492", change: "+14.2%" },
+    { label: "Active Pipelines", val: "12", change: "+2" },
+    { label: "Reach (Global)", val: "1.2M", change: "+24k" },
+    { label: "Security Health", val: "99.9%", change: "Stable" },
+  ];
+
+  return (
+    <div className="max-w-7xl mx-auto space-y-8 pb-12 px-4">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-6">
+        <div>
+          <h1 className="text-4xl font-bold tracking-tight mb-2">
+            Core Intelligence
+          </h1>
+          <p className="text-white/40 text-sm">
+            Status: Fully Operational //
+            <span className="ml-1 opacity-70">
+              {date || "Loading..."}
+            </span>
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          <button className="px-5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-white/10 transition">
+            <Clock className="w-4 h-4" />
+            Export Report
+          </button>
+
+          <button className="px-5 py-2.5 bg-primary text-base-950 rounded-xl text-sm font-bold flex items-center gap-2 hover:opacity-90 transition">
+            <Zap className="w-4 h-4" />
+            Trigger Sync
+          </button>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((stat, i) => (
+          <div
+            key={i}
+            className="p-6 rounded-2xl bg-white/5 border border-white/5 flex flex-col gap-2"
+          >
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                {stat.change}
+              </span>
+            </div>
+
+            <div className="text-[10px] text-white/40 uppercase tracking-widest font-bold">
+              {stat.label}
+            </div>
+            <div className="text-2xl font-bold">{stat.val}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Revenue Chart Placeholder */}
+      <div className="h-80 rounded-2xl bg-white/5 border border-white/5 p-8 flex flex-col">
+        <div className="flex justify-between items-center mb-8">
+          <h3 className="font-bold flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-primary" />
+            Revenue Velocity
+          </h3>
+          <div className="flex gap-2">
+            {["1D", "1W", "1M", "1Y"].map((t) => (
+              <button
+                key={t}
+                className={`px-3 py-1 rounded-lg text-[10px] font-bold border transition ${
+                  t === "1W"
+                    ? "bg-primary/10 border-primary text-primary"
+                    : "border-white/10 text-white/40 hover:text-white"
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex-1 flex items-end justify-between gap-3">
+          {[40, 60, 45, 90, 75, 85, 55, 100, 80, 65, 45, 70].map(
+            (h, i) => (
+              <div key={i} className="flex-1">
+                <div
+                  className="w-full bg-primary/30 rounded-t-lg hover:bg-primary transition cursor-pointer"
+                  style={{ height: `${h}%` }}
+                />
+              </div>
+            )
+          )}
+        </div>
+      </div>
+
+      {/* Monetization */}
+      <div className="rounded-2xl bg-white/5 border border-white/5 p-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <h3 className="text-sm font-bold">Monetization Rails</h3>
+          <CreditCard className="w-4 h-4 text-primary" />
+        </div>
+
+        <div className="space-y-3 text-[10px] font-bold">
+          {[
+            { method: "Stripe Connect", status: "ACTIVE" },
+            { method: "ACH / Direct Deposit", status: "READY" },
+            { method: "Wire Transfer (USD)", status: "ENABLED" },
+          ].map((m, i) => (
+            <div key={i} className="flex justify-between items-center">
+              <span className="text-white/40 uppercase tracking-widest">
+                {m.method}
+              </span>
+              <span className="text-primary font-mono">
+                {m.status}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Governance */}
+      <div className="rounded-2xl bg-white/5 border border-white/5 p-6 space-y-4">
+        <div className="flex justify-between items-center">
+          <h3 className="text-sm font-bold">Governance</h3>
+          <Shield className="w-4 h-4 text-green-400" />
+        </div>
+
+        <p className="text-xs text-white/40">
+          Platform operates under official service policies and compliance
+          guardrails.
+        </p>
+      </div>
+
+      {/* Recent Payouts */}
+      <div className="rounded-2xl bg-white/5 border border-white/5 p-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <h3 className="text-sm font-bold">Recent Payouts</h3>
+          <ArrowUpRight className="w-4 h-4 text-white/40" />
+        </div>
+
+        <div className="space-y-4">
+          {[
+            { date: "Jan 28, 2026", amt: "$4,280.00" },
+            { date: "Jan 21, 2026", amt: "$3,920.50" },
+            { date: "Jan 14, 2026", amt: "$4,100.00" },
+          ].map((p, i) => (
+            <div
+              key={i}
+              className="flex justify-between items-center border-b border-white/10 pb-4 last:border-0 last:pb-0"
+            >
+              <div className="text-xs font-bold">{p.date}</div>
+              <div className="text-sm font-mono font-bold">{p.amt}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
