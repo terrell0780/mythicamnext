@@ -7,12 +7,7 @@ This is the production-ready Next.js application for Mythicam, featuring real AI
 ### 1. Environment Variables
 You must update `.env.local` with your actual credentials before the app will work.
 
-```bash
-OPENAI_API_KEY=sk-...
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=ey...
-SUPABASE_SERVICE_ROLE_KEY=ey...
-```
+
 
 ### 2. Database Schema
 Run the contents of `schema.sql` in your Supabase SQL Editor to create the necessary tables and policies.
